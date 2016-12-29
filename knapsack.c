@@ -56,10 +56,23 @@ size_t n_nodes = 0;
 int factors[MAX];
 int sols = 0;
 
+char *fmt_bw[] = {
+	" %d ",
+	"[%d]",
+};
+
+char *fmt_color[] = {
+	" %d",
+	" \033[1;36m%d\033[m",
+};
+
+char **fmt = fmt_bw;
+
 static void add(int n);
 static int comp_int(const void *_a, const void *_b);
 static ssize_t print(int n);
 static void search(int sum, int n);
+static void do_usage(void);
 
 int main(int argc, char **argv)
 {
@@ -67,10 +80,14 @@ int main(int argc, char **argv)
 	struct node *p = NULL;
 	int i;
 
-	while ((opt = getopt(argc, argv, "t:v")) != EOF) {
+	while ((opt = getopt(argc, argv, "t:vch?")) != EOF) {
 		switch(opt) {
 		case 't': target = atoi(optarg); break;
 		case 'v': flags |= FLAG_VERBOSE; break;
+		case 'c': fmt = fmt_color; break;
+		case 'h': case '?':
+			do_usage();
+			exit(EXIT_SUCCESS);
 		} /* switch */
 	} /* while */
 
@@ -141,10 +158,6 @@ static ssize_t print(int n)
 {
 	ssize_t res = 0;
 	int i, j;
-	static char *fmt[] = {
-		" %d",
-		" \033[1;36m%d\033[m",
-	};
 	if (!sols++ || (flags & FLAG_VERBOSE)) {
 		res += printf(F("SOL(%d): %d = "), sols, target);
 		for (i = 0; i < n_nodes; i++) {
@@ -157,3 +170,17 @@ static ssize_t print(int n)
 	} /* if */
 	return res;
 } /* print */
+
+static void do_usage(void)
+{
+	printf(
+		"Usage: knapsack [ options ... ] [ number ... ]\n"
+		"Options:\n"
+		"  -v  Verbose: print all solutions, and not only the first one.\n"
+		"  -c  Color output: print selected numbers in bright cyan color.\n"
+		"  -h, -? Print this help screen.\n"
+		"  -t number: target number to sum.  Print solutions adding up to\n"
+		"	  number.\n"
+		"  number: list of numbers.  If empty, the list of numbers is read\n"
+		"	  from stdin.\n");
+} /* do_usage */
