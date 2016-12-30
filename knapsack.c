@@ -38,6 +38,7 @@
 #define DEFAULT_TARGET	(100)
 #define MAX				(64)
 #define FLAG_VERBOSE	(1 << 0)
+#define FLAG_FIRST      (1 << 1)
 
 #define F(x) "%s:%d:%s: " x, __FILE__, __LINE__, __func__
 
@@ -80,10 +81,11 @@ int main(int argc, char **argv)
 	struct node *p = NULL;
 	int i;
 
-	while ((opt = getopt(argc, argv, "t:vch?")) != EOF) {
+	while ((opt = getopt(argc, argv, "t:vch?1")) != EOF) {
 		switch(opt) {
 		case 't': target = atoi(optarg); break;
 		case 'v': flags |= FLAG_VERBOSE; break;
+        case '1': flags |= FLAG_FIRST; break;
 		case 'c': fmt = fmt_color; break;
 		case 'h': case '?':
 			do_usage();
@@ -118,7 +120,8 @@ int main(int argc, char **argv)
 	} /* for */
 
 	search(0, 0);
-	printf(F("%d solutions\n"), sols);
+
+    printf(F("%d solutions\n"), sols);
 
 	exit(EXIT_SUCCESS);
 } /* main */
@@ -168,6 +171,8 @@ static ssize_t print(int n)
 		} /* for */
 		res += printf("\n");
 	} /* if */
+    if (flags & FLAG_FIRST)
+        exit(EXIT_SUCCESS);
 	return res;
 } /* print */
 
@@ -179,6 +184,7 @@ static void do_usage(void)
 		"  -v  Verbose: print all solutions, and not only the first one.\n"
 		"  -c  Color output: print selected numbers in bright cyan color.\n"
 		"  -h, -? Print this help screen.\n"
+        "  -1  print only the first solution without searching for more\n"
 		"  -t number: target number to sum.  Print solutions adding up to\n"
 		"	  number.\n"
 		"  number: list of numbers.  If empty, the list of numbers is read\n"
